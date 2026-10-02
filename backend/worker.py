@@ -11,11 +11,13 @@ POLL_SECONDS = float(os.environ.get("WORKER_POLL_SECONDS", "1.0"))
 
 def claim_one(conn):
     with conn.transaction():
+        # 双岗确认：仅认领 status='pending' 且已经另一名记录员确认的单，
+        # 未确认（unconfirmed / confirmed_by IS NULL）的单一律跳过
         row = conn.execute(
             """
             SELECT id, probe_id, temp_c
             FROM probe_readings
-            WHERE status = 'pending'
+            WHERE status = 'pending' AND confirmed_by IS NOT NULL
             ORDER BY id
             FOR UPDATE SKIP LOCKED
             LIMIT 1
