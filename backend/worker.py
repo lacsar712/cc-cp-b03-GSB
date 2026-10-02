@@ -1,4 +1,4 @@
-"""后台工人：用 SKIP LOCKED 认领 pending 读数并写入合格/超温结论。"""
+"""后台工人：用 SKIP LOCKED 认领已确认的 pending 读数并写入合格/超温结论。"""
 
 import os
 import time
@@ -15,7 +15,7 @@ def claim_one(conn):
             """
             SELECT id, probe_id, temp_c
             FROM probe_readings
-            WHERE status = 'pending'
+            WHERE status = 'pending' AND confirmed_by IS NOT NULL
             ORDER BY id
             FOR UPDATE SKIP LOCKED
             LIMIT 1
